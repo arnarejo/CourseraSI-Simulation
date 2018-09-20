@@ -1,0 +1,127 @@
+---
+title: "Statistical Inference - Simulation Exercise"
+author: "Abdul Rasheed Narejo"
+date: "18/09/2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# load libraries
+library(ggplot2) # for visualization
+library(e1071) # for statistical analysis
+
+```
+
+## A simulation exercise  
+In this project you will investigate the exponential distribution in R and compare it with the Central Limit Theorem. The exponential distribution can be simulated in R with rexp(n, lambda) where lambda is the rate parameter.  
+The mean of exponential distribution is 1/lambda and the standard deviation is also 1/lambda. Set lambda = 0.2 for all of the simulations. You will investigate the distribution of averages of 40 exponentials. Note that you will need to do a thousand simulations.
+
+### What is exponential distribution ?
+[According to wikipedia](https://en.wikipedia.org/wiki/Exponential_distribution)...
+In probability theory and statistics, the exponential distribution (also known as the negative exponential distribution) is the probability distribution that describes the time between events in a Poisson point process, i.e., a process in which events occur continuously and independently at a constant average rate.
+
+The exponential distribution may be useful to model events such as
+
+* The time between goals scored in a World Cup soccer match
+* The duration of a phone call to a help center
+* The time between meteors greater than 1 meter diameter striking earth
+* The time between successive failures of a machine
+* The time from diagnosis until death in patients with metastatic cancer
+* The distance between successive breaks in a pipeline
+
+## Simulation Exerpcise
+The code for generating random exponential distribution in R is rexp(n,lamda) where n refers to the sample size and lambda is the rate parameter. The mean of exponential distribution is 1/lambda and the standard deviation is also 1/lambda. In our exercise, lambda is set to 0.2 for all the simulations.
+
+### set the variables
+```{r}
+# define the variables
+n = 40
+lambda = 0.2
+simulations = 1000
+```
+
+### set seed and generate the data
+```{r}
+set.seed(1234)
+data <- matrix(rexp(n = n * simulations, rate = lambda), nrow = simulations)
+```
+
+### calculate mean of simulations
+```{r}
+# calculate mean of each simulation
+mean.data <- rowMeans(data)
+```
+
+## Comparing simulation statistics with theoretical
+
+### Calculate mean, variance and standard deviation for simulation
+```{r}
+# simulation mean
+sim.mean <- round(mean(mean.data), 5)
+sim.mean
+
+# simulation variance
+sim.var <- round(var(mean.data), 5)
+sim.var
+
+# simulation standard deviation
+sim.sd <- sim.var^0.5
+sim.sd    
+```
+
+### Calculate theoretical mean, variance and standard deviation
+```{r}
+# theoretical mean
+theo.mean <- 1 / lambda
+theo.mean
+
+# theoretical variance
+theo.var <- (1/lambda)^2/n
+theo.var
+
+# theoretical standard deviation
+theo.sd <- theo.var ^ 0.5
+theo.sd
+```
+
+### Comparison of sample statistics with theoretical
+* Simulation mean is `r sim.mean` compared to theoretical mean of `r theo.mean`, indicating a negligble difference of `r paste(round((sim.mean/theo.mean - 1)*100,2), "%", sep="")`.
+
+* Simulation variance is `r sim.var` compared to theoretical mean of `r theo.var`, indicating a negligble difference of `r paste(round((sim.var/theo.var - 1)*100,2), "%", sep="")`.
+
+* Simulation standard deviation is `r sim.sd` compared to theoretical standard deviation of `r theo.sd`, indicating a negligble difference of `r paste(round((sim.sd/theo.sd - 1)*100,2), "%", sep="")`.  
+
+```{r}
+mean.data <- data.frame(mean.data)
+names(mean.data) <- c("mean")
+```
+
+```{r, fig.height = 4, fig.width=6}
+ggplot(data = mean.data, aes(mean, ..density..)) +
+    geom_histogram(breaks=seq(2,8, by = .1), col = "dark orange", fill = "dark orange",
+                   alpha = .5) +
+    labs(title = "Mean of exponential distribution",
+         x = "Average mean of 40 exponentials", y="Density")
+```
+
+## Conclusion
+As shown above, the mean and variance of 40 randomly generated sample values of expoential distribution are very close to the theoretical mean and variance. The distribution is approximately normal as proven by, 
+
+## Appendix
+### Additional statistical tests to check normal distribution
+
+```{r}
+shapiro.test(mean.data$mean)
+skewness(mean.data$mean)
+kurtosis(mean.data$mean)
+```
+```{r, fig.height = 4, fig.width=6}
+qqnorm(mean.data$mean)
+qqline(mean.data$mean, col = 3)
+```
